@@ -1,42 +1,42 @@
 const express = require("express");
+
+const db = require("./config/db");
+const userModel = require("./model/userModel");
+
 const app = express();
 
 app.set("view engine", "ejs");
-app.use(express.urlencoded());
+app.use(express.static("public"));
 
-let student = [
-  { id: "1", name: "ss" },
-  { id: "2", name: "dd" },
-];
 
-app.get("/", (req, res) => {
-  res.render("home", { student, editData: null });
+
+app.post("/insertData", async (req, res) => {
+    const data = await userModel.create(req.body);
+    res.send(data);
 });
 
-app.post("/insertData", (req, res) => {
-  const { id, name } = req.body;
-  student.push({ id, name }); 
-  res.redirect("/");
+app.get("/", async (req, res) => {
+    const data = await userModel.find();
+    res.send(data);
 });
 
-app.get("/delete", (req, res) => {
-  const id = req.query.id;
-  student = student.filter((el) => el.id !== id);
-  res.redirect("/");
+app.get("/index", (req, res) => {
+    res.render("index");
 });
 
-app.get("/update", (req, res) => {
-  const id = req.query.id;
-  const editData = student.find((el) => el.id === id);
-  res.render("home", { student, editData });
-});
+app.delete("/:id",async(req,res)=>{
+    const id=req.params.id;
+    console.log(id)
+    await userModel.findByIdAndDelete(id);
+    res.send("deleted");
+})
 
-app.post("/updateData", (req, res) => {
-  const { id, name } = req.body;
-  student = student.map((el) => (el.id === id ? { id, name } : el));
-  res.redirect("/");
-});
+app.patch("/:id",async(req,res)=>{
+    const id=req.params.id;
+    const data=await userModel.findByIdAndUpdate(id,res.body)
+    res.send(data); 
+})
 
-app.listen(8918, () => {
-  console.log("Server listening on port 8918");
-});
+app.listen(6789, () => {
+    console.log("server connect");
+});  
